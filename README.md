@@ -1,4 +1,4 @@
-# Customer Churn Prediction System
+# ChurnSense-A Customer Churn Prediction System
 
 A machine learning project that predicts whether a telecom customer will churn (leave the service), built with Python, scikit-learn, XGBoost, and deployed as an interactive Streamlit dashboard.
 
