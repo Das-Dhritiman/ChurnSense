@@ -10,19 +10,19 @@ import joblib
 import os
 import plotly.graph_objects as go
 
-# ─── Page Config ─────────────────────────────────────────────────────────────
+#  Page Config 
 st.set_page_config(
     page_title="Churn Predictor",
-    page_icon="📉",
+    page_icon="chart_with_downwards_trend",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ─── Theme Toggle ────────────────────────────────────────────────────────────
+#  Theme Toggle 
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
-# ─── Theme CSS ────────────────────────────────────────────────────────────────
+#  Theme CSS 
 DRACULA_THEME = """
 <style>
     /* Main background */
@@ -139,7 +139,7 @@ else:
     st.markdown(LIGHT_THEME, unsafe_allow_html=True)
 
 
-# ─── Theme Toggle Functions ───────────────────────────────────────────────────
+#  Theme Toggle Functions 
 def inject_theme_button_styles():
     """Style the theme toggle button to look premium."""
     is_dark = st.session_state.get('dark_mode', False)
@@ -172,7 +172,7 @@ def inject_theme_button_styles():
     st.markdown(styles, unsafe_allow_html=True)
 
 
-# ─── Load Model ──────────────────────────────────────────────────────────────
+#  Load Model 
 MODEL_PATH = os.path.join("models", "churn_model.pkl")
 
 
@@ -190,7 +190,7 @@ scaler = bundle["scaler"]
 feature_names = bundle["feature_names"]
 
 
-# ─── Visualization Functions ─────────────────────────────────────────────────
+#  Visualization Functions 
 def create_gauge_chart(probability):
     """Create a speedometer-style gauge chart for churn probability."""
     # Determine color based on risk level
@@ -313,7 +313,7 @@ def create_feature_importance_chart(input_df, prediction_proba):
     ))
     
     fig.update_layout(
-        title={'text': '🔍 Top Factors Influencing Prediction', 'font': {'size': 16, 'color': text_color}},
+        title={'text': ' Top Factors Influencing Prediction', 'font': {'size': 16, 'color': text_color}},
         xaxis_title='Feature Importance',
         yaxis_title='',
         height=380,
@@ -328,19 +328,19 @@ def create_feature_importance_chart(input_df, prediction_proba):
     return fig
 
 
-# ─── Header ──────────────────────────────────────────────────────────────────
+#  Header 
 # Theme toggle in header
 header_col1, header_col2 = st.columns([5, 1])
 
 with header_col1:
-    st.title("📉 Customer Churn Prediction System")
+    st.title("Customer Churn Prediction System")
 
 with header_col2:
     # Style and render theme toggle button
     inject_theme_button_styles()
     
     is_dark = st.session_state.dark_mode
-    btn_label = "☀️" if is_dark else "🌙"
+    btn_label = "Light" if is_dark else "Dark"
     if st.button(btn_label, key="theme_toggle", use_container_width=True):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
@@ -351,8 +351,8 @@ st.markdown(
 )
 st.divider()
 
-# ─── Sidebar Inputs ──────────────────────────────────────────────────────────
-st.sidebar.header("🔧 Customer Profile")
+#  Sidebar Inputs 
+st.sidebar.header("Customer Profile")
 
 gender = st.sidebar.selectbox("Gender", ["Male", "Female"])
 senior_citizen = st.sidebar.selectbox("Senior Citizen", [0, 1], format_func=lambda x: "Yes" if x else "No")
@@ -388,7 +388,7 @@ payment_method = st.sidebar.selectbox(
 )
 
 
-# ─── Build Feature Vector ────────────────────────────────────────────────────
+#  Build Feature Vector 
 def build_input():
     """Build the feature vector matching the training pipeline."""
     data = {
@@ -415,7 +415,7 @@ def build_input():
 
     df = pd.DataFrame([data])
 
-    # ── Feature Engineering (match preprocessing pipeline) ──
+    #  Feature Engineering (match preprocessing pipeline) 
     df["AvgMonthlySpend"] = np.where(
         df["tenure"] > 0,
         df["TotalCharges"] / df["tenure"],
@@ -434,7 +434,7 @@ def build_input():
         lambda row: sum(1 for v in row if v == "Yes"), axis=1
     )
 
-    # ── Encoding (match preprocessing pipeline) ──
+    #  Encoding (match preprocessing pipeline) 
     binary_map = {"Yes": 1, "No": 0, "Male": 1, "Female": 0}
     for col in df.columns:
         if df[col].dtype == "object" and set(df[col].unique()).issubset(
@@ -453,7 +453,7 @@ def build_input():
             df[col] = 0
     df = df[feature_names]
 
-    # ── Scale numeric features ──
+    #  Scale numeric features 
     numeric_features = ["tenure", "MonthlyCharges", "TotalCharges",
                         "AvgMonthlySpend", "NumServices"]
     numeric_features = [f for f in numeric_features if f in df.columns]
@@ -462,11 +462,11 @@ def build_input():
     return df
 
 
-# ─── Prediction ──────────────────────────────────────────────────────────────
+#  Prediction 
 col1, col2, col3 = st.columns([1, 1, 1])
 
 with col1:
-    predict_button = st.button("🔍 Predict Churn", type="primary", use_container_width=True)
+    predict_button = st.button("Predict Churn", type="primary", use_container_width=True)
 
 if predict_button:
     input_df = build_input()
@@ -479,24 +479,24 @@ if predict_button:
     st.divider()
 
     # Results - Top Row: Status + Gauge Chart
-    # ── Section 1: Prediction Result ──────────────────────────────────────────
+    #  Section 1: Prediction Result 
     result_col1, result_col2 = st.columns([1, 1])
 
     with result_col1:
         if prediction == 1:
-            st.error("### ⚠️ HIGH CHURN RISK")
+            st.error("### HIGH CHURN RISK")
             st.markdown("This customer is **likely to leave**. Immediate retention action recommended.")
         else:
-            st.success("### ✅ LOW CHURN RISK")
+            st.success("### LOW CHURN RISK")
             st.markdown("This customer appears **satisfied and stable**. Continue monitoring.")
 
     with result_col2:
         gauge_fig = create_gauge_chart(churn_prob)
         st.plotly_chart(gauge_fig, use_container_width=True)
 
-    # ── Section 2: Key Metrics ─────────────────────────────────────────────
+    #  Section 2: Key Metrics 
     st.divider()
-    st.subheader("📊 Key Metrics")
+    st.subheader("Key Metrics")
     
     metric_col1, metric_col2, metric_col3 = st.columns(3)
     with metric_col1:
@@ -521,9 +521,9 @@ if predict_button:
             delta_color="inverse" if prediction == 1 else "normal"
         )
 
-    # ── Section 3: Visualization ───────────────────────────────────────────
+    #  Section 3: Visualization 
     st.divider()
-    st.subheader("📈 Visualization")
+    st.subheader("Visualization")
     
     viz_col1, viz_col2 = st.columns([1, 1])
 
@@ -546,7 +546,7 @@ if predict_button:
             textfont=dict(size=14, color=text_color),
         ))
         donut_fig.update_layout(
-            title={"text": "🎯 Probability Breakdown", "font": {"size": 16, "color": text_color}},
+            title={"text": "Probability Breakdown", "font": {"size": 16, "color": text_color}},
             height=380,
             margin=dict(l=20, r=20, t=50, b=20),
             paper_bgcolor=donut_bg,
@@ -560,25 +560,25 @@ if predict_button:
         )
         st.plotly_chart(donut_fig, use_container_width=True)
 
-    # ── Section 4: Risk Factors & Recommendations ──────────────────────────
+    #  Section 4: Risk Factors & Recommendations 
     st.divider()
-    st.subheader("💡 Risk Factors & Recommendations")
+    st.subheader("Risk Factors & Recommendations")
     
     risks = []
     if contract == "Month-to-month":
-        risks.append(("📋", "Month-to-month contract", "Offer a discount for an annual plan", "high"))
+        risks.append(("", "Month-to-month contract", "Offer a discount for an annual plan", "high"))
     if tenure < 12:
-        risks.append(("🕐", "New customer (< 12 months)", "Strengthen onboarding experience", "medium"))
+        risks.append(("", "New customer (< 12 months)", "Strengthen onboarding experience", "medium"))
     if internet_service == "Fiber optic":
-        risks.append(("🌐", "Fiber optic user", "Review pricing competitiveness", "medium"))
+        risks.append(("", "Fiber optic user", "Review pricing competitiveness", "medium"))
     if tech_support == "No":
-        risks.append(("🛠️", "No tech support", "Bundle free support for 3 months", "high"))
+        risks.append(("", "No tech support", "Bundle free support for 3 months", "high"))
     if online_security == "No":
-        risks.append(("🔒", "No online security", "Offer security add-on at a discount", "low"))
+        risks.append(("", "No online security", "Offer security add-on at a discount", "low"))
     if payment_method == "Electronic check":
-        risks.append(("💳", "Electronic check", "Incentivize auto-pay enrollment", "medium"))
+        risks.append(("", "Electronic check", "Incentivize auto-pay enrollment", "medium"))
     if monthly_charges > 80:
-        risks.append(("💰", "High monthly charges", "Review plan for cost optimization", "high"))
+        risks.append(("", "High monthly charges", "Review plan for cost optimization", "high"))
 
     if risks:
         # Display in a 2-column grid for clean layout
@@ -592,7 +592,7 @@ if predict_button:
                 else:
                     st.info(f"{icon} **{factor}**\n\n→ {action}")
     else:
-        st.success("✅ No major risk factors identified. Customer profile looks stable!")
+        st.success("No major risk factors identified. Customer profile looks stable!")
 
 else:
     # Default dashboard view
@@ -634,14 +634,14 @@ else:
         ">
             <h3 style="color: {card_text}; margin-top:0;">Model Info</h3>
             <ul style="color: {card_muted}; padding-left: 20px; line-height: 2; list-style: none;">
-                <li>🤖 <strong style="color:{card_text}">Algorithm:</strong> {bundle['model_name']}</li>
-                <li>📊 <strong style="color:{card_text}">Features:</strong> {len(feature_names)}</li>
-                <li>⚖️ <strong style="color:{card_text}">Training:</strong> SMOTE-balanced, cross-validated</li>
-                <li>🔍 <strong style="color:{card_text}">Explainability:</strong> SHAP-powered insights</li>
+                <li><strong style="color:{card_text}">Algorithm:</strong> {bundle['model_name']}</li>
+                <li><strong style="color:{card_text}">Features:</strong> {len(feature_names)}</li>
+                <li><strong style="color:{card_text}">Training:</strong> SMOTE-balanced, cross-validated</li>
+                <li><strong style="color:{card_text}">Explainability:</strong> SHAP-powered insights</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
 
-# ─── Footer ──────────────────────────────────────────────────────────────────
+#  Footer 
 st.divider()
 st.caption("Built with Streamlit • scikit-learn • XGBoost • SHAP | Customer Churn Prediction System")
